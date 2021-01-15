@@ -4,7 +4,7 @@ import (
 	"sync"
 
 	"github.com/AllenDang/giu/imgui"
-	imguiLocal "github.com/AllenDang/giu/imgui"
+	imguiLocal "github.com/ianling/giu/imgui"
 	"github.com/ianling/imgui-go"
 )
 

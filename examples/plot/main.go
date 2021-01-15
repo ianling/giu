@@ -6,8 +6,8 @@ import (
 	"math/rand"
 	"time"
 
-	g "github.com/AllenDang/giu"
 	"github.com/AllenDang/giu/imgui"
+	g "github.com/ianling/giu"
 )
 
 var (
@@ -59,7 +59,7 @@ func loop() {
 }
 
 func main() {
-	var delta = 0.1
+	delta := 0.1
 	for x := 0.0; x < 10; x += delta {
 		linedata = append(linedata, math.Sin(x))
 		linedata2 = append(linedata2, math.Cos(x))
