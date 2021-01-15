@@ -8,8 +8,8 @@ import (
 	"image/draw"
 	"time"
 
-	"github.com/AllenDang/giu/imgui"
-	resty "github.com/go-resty/resty/v2"
+	"github.com/go-resty/resty/v2"
+	"github.com/inkyblackness/imgui-go/v3"
 )
 
 type LineWidget struct {
@@ -178,9 +178,9 @@ func ArrowButton(id string, dir Direction) *ArrowButtonWidget {
 	}
 }
 
-func (ab *ArrowButtonWidget) Build() {
-	if imgui.ArrowButton(ab.id, uint8(ab.dir)) && ab.onClick != nil {
-		ab.onClick()
+func (b *ArrowButtonWidget) Build() {
+	if imgui.ArrowButton(b.id, uint8(b.dir)) && b.onClick != nil {
+		b.onClick()
 	}
 }
 
@@ -201,9 +201,9 @@ func SmallButton(id string) *SmallButtonWidget {
 	}
 }
 
-func (sb *SmallButtonWidget) Build() {
-	if imgui.SmallButton(sb.id) && sb.onClick != nil {
-		sb.onClick()
+func (b *SmallButtonWidget) Build() {
+	if imgui.SmallButton(b.id) && b.onClick != nil {
+		b.onClick()
 	}
 }
 
@@ -234,9 +234,9 @@ func InvisibleButton(id string) *InvisibleButtonWidget {
 	}
 }
 
-func (ib *InvisibleButtonWidget) Build() {
-	if imgui.InvisibleButton(ib.id, imgui.Vec2{X: ib.width, Y: ib.height}) && ib.onClick != nil {
-		ib.onClick()
+func (b *InvisibleButtonWidget) Build() {
+	if imgui.InvisibleButtonV(b.id, imgui.Vec2{X: b.width, Y: b.height}, imgui.ButtonFlagsNone) && b.onClick != nil {
+		b.onClick()
 	}
 }
 
@@ -252,10 +252,10 @@ type ImageButtonWidget struct {
 	onClick      func()
 }
 
-func (i *ImageButtonWidget) Build() {
-	if i.texture != nil && i.texture.id != 0 {
-		if imgui.ImageButtonV(i.texture.id, imgui.Vec2{X: i.width, Y: i.height}, ToVec2(i.uv0), ToVec2(i.uv1), i.framePadding, ToVec4Color(i.bgColor), ToVec4Color(i.tintColor)) && i.onClick != nil {
-			i.onClick()
+func (b *ImageButtonWidget) Build() {
+	if b.texture != nil && b.texture.id != 0 {
+		if imgui.ImageButtonV(b.texture.id, imgui.Vec2{X: b.width, Y: b.height}, ToVec2(b.uv0), ToVec2(b.uv1), b.framePadding, ToVec4Color(b.bgColor), ToVec4Color(b.tintColor)) && b.onClick != nil {
+			b.onClick()
 		}
 	}
 }
@@ -539,7 +539,7 @@ func (c *ContextMenuWidget) MouseButton(mouseButton MouseButton) *ContextMenuWid
 }
 
 func (c *ContextMenuWidget) Build() {
-	if imgui.BeginPopupContextItemV(c.label, int(c.mouseButton)) {
+	if imgui.BeginPopupContextItemV(c.label, imgui.PopupFlags(c.mouseButton)) {
 		if c.layout != nil {
 			c.layout.Build()
 		}
@@ -578,7 +578,7 @@ func (d *DragIntWidget) Format(format string) *DragIntWidget {
 }
 
 func (d *DragIntWidget) Build() {
-	imgui.DragIntV(d.label, d.value, d.speed, d.min, d.max, d.format)
+	imgui.DragIntV(d.label, d.value, d.speed, d.min, d.max, d.format, imgui.SlidersFlagsNone)
 }
 
 type GroupWidget struct {
@@ -699,7 +699,7 @@ func (i *ImageWithFileWidget) Build() {
 	if state == nil {
 		widget = Image(nil).Size(i.width, i.height)
 
-		//Prevent multiple invocation to LoadImage.
+		// Prevent multiple invocation to LoadImage.
 		Context.SetState(stateId, &ImageState{})
 
 		img, err := LoadImage(i.imgPath)
@@ -768,7 +768,7 @@ func (i *ImageWithUrlWidget) Build() {
 	if state == nil {
 		widget = Image(nil).Size(i.width, i.height)
 
-		//Prevent multiple invocation to download image.
+		// Prevent multiple invocation to download image.
 		Context.SetState(stateId, &ImageState{loading: true})
 
 		go func() {
@@ -1146,7 +1146,7 @@ func (m *MenuWidget) Build() {
 
 type PopupWidget struct {
 	name   string
-	flags  WindowFlags
+	flags  imgui.PopupFlags
 	layout Layout
 }
 
@@ -1158,7 +1158,7 @@ func Popup(name string) *PopupWidget {
 	}
 }
 
-func (p *PopupWidget) Flags(flags WindowFlags) *PopupWidget {
+func (p *PopupWidget) Flags(flags imgui.PopupFlags) *PopupWidget {
 	p.flags = flags
 	return p
 }
@@ -1169,7 +1169,7 @@ func (p *PopupWidget) Layout(widgets ...Widget) *PopupWidget {
 }
 
 func (p *PopupWidget) Build() {
-	if imgui.BeginPopup(p.name, int(p.flags)) {
+	if imgui.BeginPopupV(p.name, p.flags) {
 		if p.layout != nil {
 			Update()
 			p.layout.Build()
@@ -1181,7 +1181,7 @@ func (p *PopupWidget) Build() {
 type PopupModalWidget struct {
 	name   string
 	open   *bool
-	flags  WindowFlags
+	flags  imgui.PopupFlags
 	layout Layout
 }
 
@@ -1189,7 +1189,7 @@ func PopupModal(name string) *PopupModalWidget {
 	return &PopupModalWidget{
 		name:   name,
 		open:   nil,
-		flags:  WindowFlagsNoResize,
+		flags:  imgui.PopupFlagsMouseButtonMiddle,
 		layout: nil,
 	}
 }
@@ -1199,7 +1199,7 @@ func (p *PopupModalWidget) IsOpen(open *bool) *PopupModalWidget {
 	return p
 }
 
-func (p *PopupModalWidget) Flags(flags WindowFlags) *PopupModalWidget {
+func (p *PopupModalWidget) Flags(flags imgui.PopupFlags) *PopupModalWidget {
 	p.flags = flags
 	return p
 }
@@ -1210,7 +1210,7 @@ func (p *PopupModalWidget) Layout(widgets ...Widget) *PopupModalWidget {
 }
 
 func (p *PopupModalWidget) Build() {
-	if imgui.BeginPopupModalV(p.name, p.open, int(p.flags)) {
+	if imgui.BeginPopupModalV(p.name, p.open, p.flags) {
 		if p.layout != nil {
 			Update()
 			p.layout.Build()
@@ -1453,7 +1453,6 @@ type HSplitterWidget struct {
 }
 
 func HSplitter(id string, delta *float32) *HSplitterWidget {
-
 	return &HSplitterWidget{
 		id:     id,
 		width:  0,
@@ -1495,18 +1494,18 @@ func (h *HSplitterWidget) Build() {
 	ptMax := image.Pt(centerX+width/2, centerY+height/2)
 
 	style := imgui.CurrentStyle()
-	color := Vec4ToRGBA(style.GetColor(imgui.StyleColorScrollbarGrab))
+	color := Vec4ToRGBA(style.Color(imgui.StyleColorScrollbarGrab))
 
 	// Place a invisible button to capture event.
-	imgui.InvisibleButton(h.id, imgui.Vec2{X: h.width, Y: h.height})
+	imgui.InvisibleButtonV(h.id, imgui.Vec2{X: h.width, Y: h.height}, imgui.ButtonFlagsNone)
 	if imgui.IsItemActive() {
-		*(h.delta) = imgui.CurrentIO().GetMouseDelta().Y / Context.platform.GetContentScale()
+		*(h.delta) = imgui.CurrentIO().MouseDelta().Y / Context.platform.GetContentScale()
 	} else {
 		*(h.delta) = 0
 	}
 	if imgui.IsItemHovered() {
 		imgui.SetMouseCursor(imgui.MouseCursorResizeNS)
-		color = Vec4ToRGBA(style.GetColor(imgui.StyleColorScrollbarGrabActive))
+		color = Vec4ToRGBA(style.Color(imgui.StyleColorScrollbarGrabActive))
 	}
 
 	// Draw a line in the very center
@@ -1563,18 +1562,18 @@ func (v *VSplitterWidget) Build() {
 	ptMax := image.Pt(centerX+width/2, centerY+height/2)
 
 	style := imgui.CurrentStyle()
-	color := Vec4ToRGBA(style.GetColor(imgui.StyleColorScrollbarGrab))
+	color := Vec4ToRGBA(style.Color(imgui.StyleColorScrollbarGrab))
 
 	// Place a invisible button to capture event.
-	imgui.InvisibleButton(v.id, imgui.Vec2{X: v.width, Y: v.height})
+	imgui.InvisibleButtonV(v.id, imgui.Vec2{X: float32(width), Y: float32(height)}, imgui.ButtonFlagsNone)
 	if imgui.IsItemActive() {
-		*(v.delta) = imgui.CurrentIO().GetMouseDelta().X / Context.platform.GetContentScale()
+		*(v.delta) = imgui.CurrentIO().MouseDelta().X / Context.platform.GetContentScale()
 	} else {
 		*(v.delta) = 0
 	}
 	if imgui.IsItemHovered() {
 		imgui.SetMouseCursor(imgui.MouseCursorResizeEW)
-		color = Vec4ToRGBA(style.GetColor(imgui.StyleColorScrollbarGrabActive))
+		color = Vec4ToRGBA(style.Color(imgui.StyleColorScrollbarGrabActive))
 	}
 
 	// Draw a line in the very center
@@ -2239,7 +2238,7 @@ func (d *DatePickerWidget) Build() {
 
 			today := time.Now()
 			style := imgui.CurrentStyle()
-			highlightColor := style.GetColor(imgui.StyleColorPlotHistogram)
+			highlightColor := style.Color(imgui.StyleColorPlotHistogram)
 			for r := 0; r < len(days); r++ {
 				var row []Widget
 
