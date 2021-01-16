@@ -3,13 +3,12 @@ package main
 import (
 	"image"
 	"image/color"
+	"log"
 
 	g "github.com/ianling/giu"
 )
 
-var (
-	texture *g.Texture
-)
+var texture *g.Texture
 
 func loop() {
 	g.SingleWindow("canvas").Layout(
@@ -50,13 +49,17 @@ func loop() {
 				canvas.AddImage(texture, image.Pt(350, 25), image.Pt(500, 125))
 			}
 		}),
-	)
+	).Build()
 }
 
 func main() {
 	wnd := g.NewMasterWindow("Canvas", 600, 600, g.MasterWindowFlagsNotResizable, nil)
 
-	img, _ := g.LoadImage("gopher.png")
+	img, err := g.LoadImage("gopher.png")
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	go func() {
 		texture, _ = g.NewTextureFromRgba(img)
 	}()
