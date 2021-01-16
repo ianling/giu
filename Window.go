@@ -91,10 +91,6 @@ func (w *WindowWidget) Layout(widgets ...Widget) {
 }
 
 func (w *WindowWidget) Build() {
-	if !*w.open {
-		return
-	}
-
 	if w.bringToFront {
 		w.bringToFront = false
 		imgui.SetNextWindowFocus()
