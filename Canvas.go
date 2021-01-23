@@ -49,8 +49,8 @@ func (c *Canvas) AddText(pos image.Point, color color.RGBA, text string) {
 	c.drawlist.AddText(ToVec2(pos), imgui.Packed(color), text)
 }
 
-func (c *Canvas) AddBezierCurve(pos0, cp0, cp1, pos1 image.Point, color color.RGBA, thickness float32, numSegments int) {
-	c.drawlist.AddBezierCurve(ToVec2(pos0), ToVec2(cp0), ToVec2(cp1), ToVec2(pos1), imgui.Packed(color), thickness, numSegments)
+func (c *Canvas) AddBezierCubic(pos0, cp0, cp1, pos1 image.Point, color color.RGBA, thickness float32, num_segments int) {
+	c.drawlist.AddBezierCubic(ToVec2(pos0), ToVec2(cp0), ToVec2(cp1), ToVec2(pos1), ToVec4Color(color), thickness, num_segments)
 }
 
 func (c *Canvas) AddTriangle(p1, p2, p3 image.Point, color color.RGBA, thickness float32) {
@@ -107,8 +107,8 @@ func (c *Canvas) PathArcToFast(center image.Point, radius float32, aMinOf12, aMa
 	c.drawlist.PathArcToFast(ToVec2(center), radius, aMinOf12, aMaxOf12)
 }
 
-func (c *Canvas) PathBezierCurveTo(p1, p2, p3 image.Point, numSegments int) {
-	c.drawlist.PathBezierCurveTo(ToVec2(p1), ToVec2(p2), ToVec2(p3), numSegments)
+func (c *Canvas) PathBezierCubicCurveTo(p1, p2, p3 image.Point, num_segments int) {
+	c.drawlist.PathBezierCubicCurveTo(ToVec2(p1), ToVec2(p2), ToVec2(p3), num_segments)
 }
 
 func (c *Canvas) AddImage(texture *Texture, pMin, pMax image.Point) {
