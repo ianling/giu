@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"image/color"
 
 	g "github.com/ianling/giu"
 )
@@ -17,6 +18,8 @@ func buildRows() []*g.RowWidget {
 			g.Label(names[i]),
 		)
 	}
+
+	rows[0].BgColor(&(color.RGBA{200, 100, 100, 255}))
 
 	return rows
 }
