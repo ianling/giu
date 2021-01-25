@@ -70,9 +70,9 @@ func (w *WindowWidget) Pos(x, y float32) *WindowWidget {
 	return w
 }
 
-func (w *WindowWidget) Layout(layout Layout) *WindowWidget {
-	if layout == nil {
-		return w
+func (w *WindowWidget) Layout(widgets ...Widget) {
+	if widgets == nil {
+		return
 	}
 
 	if w.flags&imgui.WindowFlagsNoMove != 0 && w.flags&imgui.WindowFlagsNoResize != 0 {

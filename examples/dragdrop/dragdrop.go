@@ -8,12 +8,10 @@ import (
 	"github.com/ianling/imgui-go"
 )
 
-var (
-	dropTarget string = "Drop here"
-)
+var dropTarget string = "Drop here"
 
 func loop() {
-	g.SingleWindow("Drag and Drop").Layout(g.Layout{
+	g.SingleWindow("Drag and Drop").Layout(
 		g.Line(
 			g.Button("Drag me: 9"),
 			g.Custom(func() {
@@ -42,7 +40,7 @@ func loop() {
 				imgui.EndDragDropTarget()
 			}
 		}),
-	}).Build()
+	).Build()
 }
 
 func main() {
