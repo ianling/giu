@@ -104,9 +104,11 @@ func (w *WindowWidget) Build() {
 		imgui.SetNextWindowFocus()
 	}
 
-	imgui.BeginV(w.title, w.open, int(w.flags))
+	showed := imgui.BeginV(w.title, w.open, int(w.flags))
 
-	w.layout.Build()
+	if showed {
+		w.layout.Build()
+	}
 
 	imgui.End()
 }
