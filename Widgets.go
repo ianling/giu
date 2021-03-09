@@ -699,7 +699,7 @@ func (i *ImageWithFileWidget) Build() {
 	if state == nil {
 		widget = Image(nil).Size(i.width, i.height)
 
-		//Prevent multiple invocation to LoadImage.
+		// Prevent multiple invocation to LoadImage.
 		Context.SetState(stateId, &ImageState{})
 
 		img, err := LoadImage(i.imgPath)
@@ -768,7 +768,7 @@ func (i *ImageWithUrlWidget) Build() {
 	if state == nil {
 		widget = Image(nil).Size(i.width, i.height)
 
-		//Prevent multiple invocation to download image.
+		// Prevent multiple invocation to download image.
 		Context.SetState(stateId, &ImageState{loading: true})
 
 		go func() {
@@ -1455,7 +1455,6 @@ type HSplitterWidget struct {
 }
 
 func HSplitter(id string, delta *float32) *HSplitterWidget {
-
 	return &HSplitterWidget{
 		id:     id,
 		width:  0,
