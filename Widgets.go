@@ -1353,7 +1353,6 @@ func (s *SliderIntWidget) Size(width float32) *SliderIntWidget {
 
 func (s *SliderIntWidget) OnChange(onChange func()) *SliderIntWidget {
 	s.onChange = onChange
-
 	return s
 }
 
