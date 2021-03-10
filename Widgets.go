@@ -1335,6 +1335,7 @@ func SliderInt(label string, value *int32, min, max int32) *SliderIntWidget {
 		value:    value,
 		min:      min,
 		max:      max,
+		width:    0,
 		format:   "%d",
 		width:    0,
 		onChange: nil,
@@ -1375,8 +1376,8 @@ type SliderFloatWidget struct {
 	value    *float32
 	min      float32
 	max      float32
-	format   string
 	width    float32
+	format   string
 	onChange func()
 }
 
