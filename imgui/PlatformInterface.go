@@ -1,7 +1,5 @@
 package imgui
 
-import "github.com/go-gl/glfw/v3.3/glfw"
-
 type Platform interface {
 	// ShouldStop is regularly called as the abort condition for the program loop.
 	ShouldStop() bool
@@ -23,8 +21,6 @@ type Platform interface {
 	SetPosChangeCallback(func(x, y int))
 	// Set drop callback
 	SetDropCallback(func(names []string))
-	// Set input callback
-	SetInputCallback(func(key glfw.Key, mods glfw.ModifierKey, action glfw.Action))
 	// Force Update
 	Update()
 	// GetContentScale function retrieves the content scale for the specified monitor.

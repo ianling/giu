@@ -5,8 +5,6 @@ import (
 	"math"
 	"runtime"
 
-	. "github.com/ianling/imgui-go"
-
 	"github.com/go-gl/glfw/v3.3/glfw"
 )
 
@@ -51,7 +49,6 @@ type GLFW struct {
 	posChangeCallback  func(int, int)
 	sizeChangeCallback func(int, int)
 	dropCallback       func([]string)
-	inputCallback	   func(key glfw.Key, mods glfw.ModifierKey, action glfw.Action)
 }
 
 // NewGLFW attempts to initialize a GLFW context.
@@ -209,7 +206,17 @@ func (platform *GLFW) ShouldStop() bool {
 }
 
 func (platform *GLFW) WaitForEvent() {
+	if platform.imguiIO.GetConfigFlags()&ConfigFlagEnablePowerSavingMode == 0 {
+		return
+	}
+
+	windowIsHidden := platform.window.GetAttrib(glfw.Visible) == glfw.False || platform.window.GetAttrib(glfw.Iconified) == glfw.True
+
 	waitingTime := math.Inf(0)
+
+	if !windowIsHidden {
+		waitingTime = GetEventWaitingTime()
+	}
 
 	if waitingTime > 0 {
 		if math.IsInf(waitingTime, 0) {
@@ -289,18 +296,14 @@ func (platform *GLFW) SetDropCallback(cb func(names []string)) {
 	platform.dropCallback = cb
 }
 
-func (platform *GLFW) SetInputCallback(cb func(key glfw.Key, mods glfw.ModifierKey, action glfw.Action)) {
-	platform.inputCallback = cb
-}
-
 func (platform *GLFW) updateMouseCursor() {
 	io := platform.imguiIO
-	if (io.ConfigFlags()&ConfigFlagNoMouseCursorChange) == 1 || platform.window.GetInputMode(glfw.CursorMode) == glfw.CursorDisabled {
+	if (io.GetConfigFlags()&ConfigFlagNoMouseCursorChange) == 1 || platform.window.GetInputMode(glfw.CursorMode) == glfw.CursorDisabled {
 		return
 	}
 
 	cursor := MouseCursor()
-	if cursor == MouseCursorNone || io.MouseDrawCursor() {
+	if cursor == MouseCursorNone || io.GetMouseDrawCursor() {
 		platform.window.SetInputMode(glfw.CursorMode, glfw.CursorHidden)
 	} else {
 		gCursor := platform.mouseCursors[MouseCursorArrow]
@@ -368,6 +371,8 @@ func (platform *GLFW) onDrop(window *glfw.Window, names []string) {
 }
 
 func (platform *GLFW) posChange(window *glfw.Window, x, y int) {
+	platform.imguiIO.SetFrameCountSinceLastInput(0)
+
 	// Notfy pos changed and redraw.
 	if platform.posChangeCallback != nil {
 		platform.posChangeCallback(x, y)
@@ -375,6 +380,8 @@ func (platform *GLFW) posChange(window *glfw.Window, x, y int) {
 }
 
 func (platform *GLFW) sizeChange(window *glfw.Window, width, height int) {
+	platform.imguiIO.SetFrameCountSinceLastInput(0)
+
 	// Notify size changed and redraw.
 	if platform.sizeChangeCallback != nil {
 		platform.sizeChangeCallback(width, height)
@@ -382,6 +389,8 @@ func (platform *GLFW) sizeChange(window *glfw.Window, width, height int) {
 }
 
 func (platform *GLFW) mouseButtonChange(window *glfw.Window, rawButton glfw.MouseButton, action glfw.Action, mods glfw.ModifierKey) {
+	platform.imguiIO.SetFrameCountSinceLastInput(0)
+
 	buttonIndex, known := glfwButtonIndexByID[rawButton]
 
 	if known && (action == glfw.Press) {
@@ -390,10 +399,13 @@ func (platform *GLFW) mouseButtonChange(window *glfw.Window, rawButton glfw.Mous
 }
 
 func (platform *GLFW) mouseScrollChange(window *glfw.Window, x, y float64) {
+	platform.imguiIO.SetFrameCountSinceLastInput(0)
 	platform.imguiIO.AddMouseWheelDelta(float32(x), float32(y))
 }
 
 func (platform *GLFW) keyChange(window *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
+	platform.imguiIO.SetFrameCountSinceLastInput(0)
+
 	if action == glfw.Press {
 		platform.imguiIO.KeyPress(int(key))
 	}
@@ -406,13 +418,10 @@ func (platform *GLFW) keyChange(window *glfw.Window, key glfw.Key, scancode int,
 	platform.imguiIO.KeyShift(int(glfw.KeyLeftShift), int(glfw.KeyRightShift))
 	platform.imguiIO.KeyAlt(int(glfw.KeyLeftAlt), int(glfw.KeyRightAlt))
 	platform.imguiIO.KeySuper(int(glfw.KeyLeftSuper), int(glfw.KeyRightSuper))
-
-	if platform.inputCallback != nil {
-		platform.inputCallback(key, mods, action)
-	}
 }
 
 func (platform *GLFW) charChange(window *glfw.Window, char rune) {
+	platform.imguiIO.SetFrameCountSinceLastInput(0)
 	platform.imguiIO.AddInputCharacters(string(char))
 }
 

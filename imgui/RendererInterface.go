@@ -1,9 +1,6 @@
 package imgui
 
-import (
-	. "github.com/ianling/imgui-go"
-	"image"
-)
+import "image"
 
 // Renderer covers rendering imgui draw data.
 type Renderer interface {
