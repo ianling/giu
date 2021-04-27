@@ -2373,7 +2373,7 @@ func (ce *ColorEditWidget) Build() {
 	if imgui.ColorEdit4V(
 		ce.label,
 		&col,
-		int(ce.flags),
+		imgui.ColorEditFlags(ce.flags),
 	) {
 		*ce.color = Vec4ToRGBA(imgui.Vec4{
 			col[0],
