@@ -726,6 +726,8 @@ type ImageWithUrlWidget struct {
 	height          float32
 	whenLoading     Layout
 	whenFailure     Layout
+	onReady         func()
+	onFailure       func(error)
 }
 
 func ImageWithUrl(url string) *ImageWithUrlWidget {
@@ -737,6 +739,17 @@ func ImageWithUrl(url string) *ImageWithUrlWidget {
 		whenLoading:     Layout{Dummy(100, 100)},
 		whenFailure:     Layout{Dummy(100, 100)},
 	}
+}
+
+// Event trigger when image is downloaded and ready to display.
+func (i *ImageWithUrlWidget) OnReady(onReady func()) *ImageWithUrlWidget {
+	i.onReady = onReady
+	return i
+}
+
+func (i *ImageWithUrlWidget) OnFailure(onFailure func(error)) *ImageWithUrlWidget {
+	i.onFailure = onFailure
+	return i
 }
 
 func (i *ImageWithUrlWidget) Timeout(downloadTimeout time.Duration) *ImageWithUrlWidget {
@@ -780,12 +793,22 @@ func (i *ImageWithUrlWidget) Build() {
 			Context.SetState(stateId, &ImageState{loading: false})
 			if err != nil {
 				Context.SetState(stateId, &ImageState{failure: true})
+
+				// Trigger onFailure event
+				if i.onFailure != nil {
+					i.onFailure(err)
+				}
 				return
 			}
 
 			img, _, err := image.Decode(bytes.NewReader(resp.Body()))
 			if err != nil {
 				Context.SetState(stateId, &ImageState{failure: true})
+
+				// Trigger onFailure event
+				if i.onFailure != nil {
+					i.onFailure(err)
+				}
 				return
 			}
 
@@ -795,9 +818,19 @@ func (i *ImageWithUrlWidget) Build() {
 			texture, err := NewTextureFromRgba(rgba)
 			if err != nil {
 				Context.SetState(stateId, &ImageState{failure: true})
+
+				// Trigger onFailure event
+				if i.onFailure != nil {
+					i.onFailure(err)
+				}
 				return
 			}
 			Context.SetState(stateId, &ImageState{loading: false, texture: texture})
+
+			// Trigger onReady event
+			if i.onReady != nil {
+				i.onReady()
+			}
 		}()
 	} else {
 		imgState := state.(*ImageState)
@@ -2341,6 +2374,7 @@ type ColorEditWidget struct {
 	label    string
 	color    *color.RGBA
 	flags    ColorEditFlags
+	width    float32
 	onChange func()
 }
 
@@ -2362,6 +2396,11 @@ func (ce *ColorEditWidget) Flags(f ColorEditFlags) *ColorEditWidget {
 	return ce
 }
 
+func (ce *ColorEditWidget) Size(width float32) *ColorEditWidget {
+	ce.width = width * Context.platform.GetContentScale()
+	return ce
+}
+
 func (ce *ColorEditWidget) Build() {
 	c := ToVec4Color(*ce.color)
 	col := [4]float32{
@@ -2370,19 +2409,28 @@ func (ce *ColorEditWidget) Build() {
 		c.Z,
 		c.W,
 	}
+
+	if ce.width > 0 {
+		imgui.PushItemWidth(ce.width)
+	}
+
 	if imgui.ColorEdit4V(
 		ce.label,
 		&col,
 		imgui.ColorEditFlags(ce.flags),
 	) {
 		*ce.color = Vec4ToRGBA(imgui.Vec4{
-			col[0],
-			col[1],
-			col[2],
-			col[3],
+			X: col[0],
+			Y: col[1],
+			Z: col[2],
+			W: col[3],
 		})
 		if ce.onChange != nil {
 			ce.onChange()
 		}
+	}
+
+	if ce.width > 0 {
+		imgui.PopItemWidth()
 	}
 }
