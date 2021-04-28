@@ -2374,6 +2374,7 @@ type ColorEditWidget struct {
 	label    string
 	color    *color.RGBA
 	flags    ColorEditFlags
+	width    float32
 	onChange func()
 }
 
@@ -2395,6 +2396,11 @@ func (ce *ColorEditWidget) Flags(f ColorEditFlags) *ColorEditWidget {
 	return ce
 }
 
+func (ce *ColorEditWidget) Size(width float32) *ColorEditWidget {
+	ce.width = width * Context.platform.GetContentScale()
+	return ce
+}
+
 func (ce *ColorEditWidget) Build() {
 	c := ToVec4Color(*ce.color)
 	col := [4]float32{
@@ -2403,19 +2409,28 @@ func (ce *ColorEditWidget) Build() {
 		c.Z,
 		c.W,
 	}
+
+	if ce.width > 0 {
+		imgui.PushItemWidth(ce.width)
+	}
+
 	if imgui.ColorEdit4V(
 		ce.label,
 		&col,
 		imgui.ColorEditFlags(ce.flags),
 	) {
 		*ce.color = Vec4ToRGBA(imgui.Vec4{
-			col[0],
-			col[1],
-			col[2],
-			col[3],
+			X: col[0],
+			Y: col[1],
+			Z: col[2],
+			W: col[3],
 		})
 		if ce.onChange != nil {
 			ce.onChange()
 		}
+	}
+
+	if ce.width > 0 {
+		imgui.PopItemWidth()
 	}
 }
