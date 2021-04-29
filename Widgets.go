@@ -12,17 +12,17 @@ import (
 	"github.com/ianling/imgui-go"
 )
 
-type LineWidget struct {
+type RowWidget struct {
 	widgets []Widget
 }
 
-func Line(widgets ...Widget) *LineWidget {
-	return &LineWidget{
+func Row(widgets ...Widget) *RowWidget {
+	return &RowWidget{
 		widgets: widgets,
 	}
 }
 
-func (l *LineWidget) Build() {
+func (l *RowWidget) Build() {
 	index := 0
 
 	for _, w := range l.widgets {
@@ -581,26 +581,29 @@ func (d *DragIntWidget) Build() {
 	imgui.DragIntV(d.label, d.value, d.speed, d.min, d.max, d.format, imgui.SliderFlagsNone)
 }
 
-type GroupWidget struct {
-	layout Layout
+type ColumnWidget struct {
+	widgets []Widget
 }
 
-func Group() *GroupWidget {
-	return &GroupWidget{
-		layout: nil,
+// Column layout will place all widgets one by one vertically.
+func Column(widgets ...Widget) *ColumnWidget {
+	return &ColumnWidget{
+		widgets: widgets,
 	}
 }
 
-func (g *GroupWidget) Layout(widgets ...Widget) *GroupWidget {
-	g.layout = widgets
+func (g *ColumnWidget) Layout(widgets ...Widget) *ColumnWidget {
+	g.widgets = widgets
 	return g
 }
 
-func (g *GroupWidget) Build() {
+func (g *ColumnWidget) Build() {
 	imgui.BeginGroup()
-	if g.layout != nil {
-		g.layout.Build()
+
+	for _, w := range g.widgets {
+		w.Build()
 	}
+
 	imgui.EndGroup()
 }
 
@@ -1733,15 +1736,15 @@ func (t *TabBarWidget) Build() {
 	}
 }
 
-type RowWidget struct {
+type TableRowWidget struct {
 	flags        imgui.TableRowFlags
 	minRowHeight float64
 	layout       Layout
 	bgColor      *color.RGBA
 }
 
-func Row(widgets ...Widget) *RowWidget {
-	return &RowWidget{
+func TableRow(widgets ...Widget) *TableRowWidget {
+	return &TableRowWidget{
 		flags:        0,
 		minRowHeight: 0,
 		layout:       widgets,
@@ -1749,22 +1752,22 @@ func Row(widgets ...Widget) *RowWidget {
 	}
 }
 
-func (r *RowWidget) BgColor(c *color.RGBA) *RowWidget {
+func (r *TableRowWidget) BgColor(c *color.RGBA) *TableRowWidget {
 	r.bgColor = c
 	return r
 }
 
-func (r *RowWidget) Flags(flags imgui.TableRowFlags) *RowWidget {
+func (r *TableRowWidget) Flags(flags imgui.TableRowFlags) *TableRowWidget {
 	r.flags = flags
 	return r
 }
 
-func (r *RowWidget) MinHeight(height float64) *RowWidget {
+func (r *TableRowWidget) MinHeight(height float64) *TableRowWidget {
 	r.minRowHeight = height
 	return r
 }
 
-func (r *RowWidget) Build() {
+func (r *TableRowWidget) Build() {
 	imgui.TableNextRowV(r.flags, float32(r.minRowHeight))
 
 	for _, w := range r.layout {
@@ -1783,15 +1786,15 @@ func (r *RowWidget) Build() {
 	}
 }
 
-type ColumnWidget struct {
+type TableColumnWidget struct {
 	label              string
 	flags              imgui.TableColumnFlags
 	innerWidthOrWeight float32
 	userId             uint32
 }
 
-func Column(label string) *ColumnWidget {
-	return &ColumnWidget{
+func TableColumn(label string) *TableColumnWidget {
+	return &TableColumnWidget{
 		label:              label,
 		flags:              0,
 		innerWidthOrWeight: 0,
@@ -1799,22 +1802,22 @@ func Column(label string) *ColumnWidget {
 	}
 }
 
-func (c *ColumnWidget) Flags(flags imgui.TableColumnFlags) *ColumnWidget {
+func (c *TableColumnWidget) Flags(flags imgui.TableColumnFlags) *TableColumnWidget {
 	c.flags = flags
 	return c
 }
 
-func (c *ColumnWidget) InnerWidthOrWeight(w float32) *ColumnWidget {
+func (c *TableColumnWidget) InnerWidthOrWeight(w float32) *TableColumnWidget {
 	c.innerWidthOrWeight = w
 	return c
 }
 
-func (c *ColumnWidget) UserId(id uint32) *ColumnWidget {
+func (c *TableColumnWidget) UserId(id uint32) *TableColumnWidget {
 	c.userId = id
 	return c
 }
 
-func (c *ColumnWidget) Build() {
+func (c *TableColumnWidget) Build() {
 	imgui.TableSetupColumnV(c.label, c.flags, c.innerWidthOrWeight, uint(c.userId))
 }
 
@@ -1823,8 +1826,8 @@ type TableWidget struct {
 	flags        imgui.TableFlags
 	size         imgui.Vec2
 	innerWidth   float64
-	rows         []*RowWidget
-	columns      []*ColumnWidget
+	rows         []*TableRowWidget
+	columns      []*TableColumnWidget
 	fastMode     bool
 	freezeRow    int
 	freezeColumn int
@@ -1855,12 +1858,12 @@ func (t *TableWidget) Freeze(col, row int) *TableWidget {
 	return t
 }
 
-func (t *TableWidget) Columns(cols ...*ColumnWidget) *TableWidget {
+func (t *TableWidget) Columns(cols ...*TableColumnWidget) *TableWidget {
 	t.columns = cols
 	return t
 }
 
-func (t *TableWidget) Rows(rows ...*RowWidget) *TableWidget {
+func (t *TableWidget) Rows(rows ...*TableRowWidget) *TableWidget {
 	t.rows = rows
 	return t
 }
@@ -2302,18 +2305,18 @@ func (d *DatePickerWidget) Build() {
 				}
 			}
 
-			columns := []*ColumnWidget{
-				Column("S"),
-				Column("M"),
-				Column("T"),
-				Column("W"),
-				Column("T"),
-				Column("F"),
-				Column("S"),
+			columns := []*TableColumnWidget{
+				TableColumn("S"),
+				TableColumn("M"),
+				TableColumn("T"),
+				TableColumn("W"),
+				TableColumn("T"),
+				TableColumn("F"),
+				TableColumn("S"),
 			}
 
 			// Build day widgets
-			var rows []*RowWidget
+			var rows []*TableRowWidget
 
 			today := time.Now()
 			style := imgui.CurrentStyle()
@@ -2354,7 +2357,7 @@ func (d *DatePickerWidget) Build() {
 					}
 				}
 
-				rows = append(rows, Row(row...))
+				rows = append(rows, TableRow(row...))
 			}
 
 			Table("DayTable").Flags(imgui.TableFlagsBorders | imgui.TableFlagsSizingStretchSame).Columns(columns...).Rows(rows...).Build()

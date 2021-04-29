@@ -22,11 +22,7 @@ func onQuit() {
 func loop() {
 	g.SingleWindow("hello world").Layout(
 		g.Label("Hello world from giu"),
-		g.Line(
-			g.Button("Click Me").OnClick(onClickMe),
-			g.Button("I'm so cute").OnClick(onImSoCute),
-			g.Button("Quit").OnClick(onQuit),
-		),
+		g.InputTextMultiline("##content", &content).Size(-1, -1),
 	)
 }
 
