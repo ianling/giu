@@ -7,6 +7,8 @@ import (
 	g "github.com/ianling/giu"
 )
 
+var content string
+
 func onClickMe() {
 	fmt.Println("Hello world!")
 }
