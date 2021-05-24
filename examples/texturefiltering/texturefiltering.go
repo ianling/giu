@@ -14,41 +14,41 @@ var (
 
 func loop() {
 	g.SingleWindow("load image").Layout(
-		g.Group().Layout(
+		g.Column(
 			g.Label("15x20 pixel image"),
-			g.Line(
-				g.Group().Layout(
+			g.Row(
+				g.Column(
 					g.Label("50%"),
 					g.Image(spriteTexture).Size(8, 10),
 				),
-				g.Group().Layout(
+				g.Column(
 					g.Label("100%"),
 					g.Image(spriteTexture).Size(15, 20),
 				),
-				g.Group().Layout(
+				g.Column(
 					g.Label("800%"),
 					g.Image(spriteTexture).Size(120, 160),
 				),
 			),
 		),
-		g.Group().Layout(
+		g.Column(
 			g.Label("215x140 image"),
-			g.Line(
-				g.Group().Layout(
+			g.Row(
+				g.Column(
 					g.Label("50%"),
 					g.Image(largeTexture).Size(215/2, 140/2),
 				),
-				g.Group().Layout(
+				g.Column(
 					g.Label("100%"),
 					g.Image(largeTexture).Size(215, 140),
 				),
-				g.Group().Layout(
+				g.Column(
 					g.Label("200%"),
 					g.Image(largeTexture).Size(215*2, 140*2),
 				),
 			),
 		),
-		g.Line(
+		g.Row(
 			g.Button("Minify Filter Nearest").OnClick(func() {
 				_ = g.Context.GetRenderer().SetTextureMinFilter(g.TextureFilterNearest)
 			}),
@@ -68,7 +68,7 @@ func loop() {
 				g.Context.GetRenderer().SetTextureMinFilter(g.TextureFilterLinearMipmapLinear)
 			}),*/
 		),
-		g.Line(
+		g.Row(
 			g.Button("Magnify Filter Nearest").OnClick(func() {
 				_ = g.Context.GetRenderer().SetTextureMagFilter(g.TextureFilterNearest)
 			}),
