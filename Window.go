@@ -1,6 +1,8 @@
 package giu
 
 import (
+	"fmt"
+
 	"github.com/ianling/imgui-go"
 )
 
@@ -28,13 +30,20 @@ func SingleWindowWithMenuBar(title string) *WindowWidget {
 				WindowFlagsNoResize).Size(size[0], size[1])
 }
 
+type windowState struct {
+	hasFocus bool
+}
+
+func (s *windowState) Dispose() {
+	// noop
+}
+
 type WindowWidget struct {
 	title         string
 	open          *bool
 	flags         WindowFlags
 	x, y          float32
 	width, height float32
-	hasFocus      bool
 	bringToFront  bool
 	pos           imgui.Vec2
 	size          imgui.Vec2
@@ -74,6 +83,8 @@ func (w *WindowWidget) Layout(widgets ...Widget) {
 		return
 	}
 
+	ws := w.getState()
+
 	if w.flags&WindowFlagsNoMove != 0 && w.flags&WindowFlagsNoResize != 0 {
 		imgui.SetNextWindowPos(imgui.Vec2{X: w.x, Y: w.y})
 		imgui.SetNextWindowSize(imgui.Vec2{X: w.width, Y: w.height})
@@ -83,7 +94,12 @@ func (w *WindowWidget) Layout(widgets ...Widget) {
 	}
 
 	widgets = append(widgets, Custom(func() {
-		w.hasFocus = IsWindowFocused()
+		hasFocus := IsWindowFocused()
+		if !hasFocus && ws.hasFocus {
+			unregisterWindowShortcuts()
+		}
+
+		ws.hasFocus = hasFocus
 		w.pos = imgui.WindowPos()
 		w.size = imgui.WindowSize()
 	}))
@@ -102,10 +118,6 @@ func (w *WindowWidget) Layout(widgets ...Widget) {
 	imgui.End()
 }
 
-func (w *WindowWidget) HasFocus() bool {
-	return w.hasFocus
-}
-
 func (w *WindowWidget) CurrentPosition() (x, y float32) {
 	return w.pos.X, w.pos.Y
 }
@@ -116,4 +128,42 @@ func (w *WindowWidget) CurrentSize() (width, height float32) {
 
 func (w *WindowWidget) BringToFront() {
 	w.bringToFront = true
+}
+
+func (w *WindowWidget) HasFocus() bool {
+	return w.getState().hasFocus
+}
+
+func (w *WindowWidget) RegisterKeyboardShortcuts(s ...WindowShortcut) *WindowWidget {
+	if w.HasFocus() {
+		for _, shortcut := range s {
+			RegisterKeyboardShortcuts(Shortcut{
+				Key:      shortcut.Key,
+				Modifier: shortcut.Modifier,
+				Callback: shortcut.Callback,
+				IsGlobal: LocalShortcut,
+			})
+		}
+	}
+
+	return w
+}
+
+func (w *WindowWidget) getStateID() string {
+	return fmt.Sprintf("%s_windowState", w.title)
+}
+
+// returns window state
+func (w *WindowWidget) getState() (state *windowState) {
+	s := Context.GetState(w.getStateID())
+
+	if s != nil {
+		state = s.(*windowState)
+	} else {
+		state = &windowState{}
+
+		Context.SetState(w.getStateID(), state)
+	}
+
+	return state
 }

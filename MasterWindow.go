@@ -84,6 +84,8 @@ func NewMasterWindow(title string, width, height int, flags MasterWindowFlags, l
 		renderer:   r,
 	}
 
+	mw.platform.SetInputCallback(handler)
+
 	p.SetSizeChangeCallback(mw.sizeChange)
 
 	mw.setTheme()
@@ -270,4 +272,17 @@ func (w *MasterWindow) Run(loopFunc func()) {
 			w.context.Destroy()
 		})
 	})
+}
+
+func (w *MasterWindow) RegisterKeyboardShortcuts(s ...WindowShortcut) *MasterWindow {
+	for _, shortcut := range s {
+		RegisterKeyboardShortcuts(Shortcut{
+			Key:      shortcut.Key,
+			Modifier: shortcut.Modifier,
+			Callback: shortcut.Callback,
+			IsGlobal: GlobalShortcut,
+		})
+	}
+
+	return w
 }
