@@ -1,7 +1,6 @@
 package giu
 
 import (
-	"github.com/go-gl/glfw/v3.3/glfw"
 	"image/color"
 	"time"
 
@@ -245,10 +244,6 @@ func (w *MasterWindow) SetSize(x, y int) {
 
 func (w *MasterWindow) SetDropCallback(cb func([]string)) {
 	w.platform.SetDropCallback(cb)
-}
-
-func (w *MasterWindow) SetInputCallback(cb func(key glfw.Key, mods glfw.ModifierKey, action glfw.Action)) {
-	w.platform.SetInputCallback(cb)
 }
 
 // Call the main loop.
