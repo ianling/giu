@@ -1,7 +1,6 @@
 package giu
 
 import (
-	"github.com/go-gl/glfw/v3.3/glfw"
 	"image/color"
 	"time"
 
@@ -83,6 +82,8 @@ func NewMasterWindow(title string, width, height int, flags MasterWindowFlags, l
 		platform:   p,
 		renderer:   r,
 	}
+
+	mw.platform.SetInputCallback(handler)
 
 	p.SetSizeChangeCallback(mw.sizeChange)
 
@@ -245,10 +246,6 @@ func (w *MasterWindow) SetDropCallback(cb func([]string)) {
 	w.platform.SetDropCallback(cb)
 }
 
-func (w *MasterWindow) SetInputCallback(cb func(key glfw.Key, mods glfw.ModifierKey, action glfw.Action)) {
-	w.platform.SetInputCallback(cb)
-}
-
 // Call the main loop.
 // loopFunc will be used to construct the ui.
 func (w *MasterWindow) Run(loopFunc func()) {
@@ -270,4 +267,17 @@ func (w *MasterWindow) Run(loopFunc func()) {
 			w.context.Destroy()
 		})
 	})
+}
+
+func (w *MasterWindow) RegisterKeyboardShortcuts(s ...WindowShortcut) *MasterWindow {
+	for _, shortcut := range s {
+		RegisterKeyboardShortcuts(Shortcut{
+			Key:      shortcut.Key,
+			Modifier: shortcut.Modifier,
+			Callback: shortcut.Callback,
+			IsGlobal: GlobalShortcut,
+		})
+	}
+
+	return w
 }
